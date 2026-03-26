@@ -1,0 +1,14 @@
+deployments:
+    - env: dev
+      executor: celery
+      image:
+        name: quay.io/astronomer/astro-runtime:7.3.0
+      name: dev
+      volumes:
+        - ./include:/usr/local/airflow/include
+postgres:
+    port: "5433"
+project:
+    name: titanic-but-special
+webserver:
+    port: "8080"

@@ -1,0 +1,6 @@
+[ 2026-03-24 00:09:37,309] 61 root - INFO - Starting data ingestion process.
+[ 2026-03-24 00:09:37,367] 26 root - INFO - Successfully connected to the database.
+[ 2026-03-24 00:09:39,458] 39 root - INFO - Data extraction successful.
+[ 2026-03-24 00:09:39,460] 49 root - INFO - Data split into training and testing sets successfully.
+[ 2026-03-24 00:09:39,461] 56 root - ERROR - Error saving data to CSV files.
+[ 2026-03-24 00:09:39,461] 67 root - ERROR - Data ingestion process failed.

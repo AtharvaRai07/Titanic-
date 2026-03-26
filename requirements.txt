@@ -1,0 +1,10 @@
+pandas
+numpy
+scikit-learn
+matplotlib
+seaborn
+setuptools
+psycopg2
+imbalanced-learn
+redis
+# -e .
