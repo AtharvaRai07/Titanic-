@@ -7,12 +7,19 @@ from config.paths_config import MODEL_DIR
 from pipeline.training_pipeline import TrainingPipeline
 from src.logger import logging
 from src.exception import CustomException
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, Response
 from sklearn.preprocessing import StandardScaler
 from alibi_detect.cd import KSDrift
 from src.feature_store import RedisFeatureStore
 
+from prometheus_client import start_http_server, Counter, Gauge, generate_latest
+
 app = Flask(__name__, template_folder='templates', static_folder='templates', static_url_path='')
+
+prediction_count = Counter('prediction_count', 'Total number of predictions count')
+drift_count = Counter('drift_count', 'Total number of drift detections')
+
+
 
 # Load trained model
 model = None
@@ -136,6 +143,9 @@ def predict():
 
             if drift_result is not None and drift_result == 1:
                 print("Data drift detected for input features.")
+
+                drift_count.inc(1)
+
                 logging.warning("Data drift detected for input features.")
             else:
                 print("No data drift detected for input features.")
@@ -144,6 +154,9 @@ def predict():
             logging.warning("KSDrift detector not available. Skipping drift detection.")
 
         prediction = int(model.predict(features)[0])
+
+        prediction_count.inc(1)
+
         probability = float(model.predict_proba(features)[0][1])
 
         logging.info(f"Prediction made - Input: {features[0]}, Prediction: {prediction}, Probability: {probability}")
@@ -158,8 +171,17 @@ def predict():
         logging.error(f"Error during prediction: {str(e)}")
         return jsonify({'error': f'Prediction error: {str(e)}'}), 500
 
+@app.route('/metrics')
+def metrics():
+    try:
+        return Response(generate_latest(), content_type='text/plain')
+    except Exception as e:
+        logging.error(f"Error generating metrics: {str(e)}")
+        return Response(f"Error generating metrics: {str(e)}", status=500, content_type='text/plain')
+
 
 if __name__ == '__main__':
-    app.run(debug=True,host = "localhost",port=5000)
+    start_http_server(8000)
+    app.run(debug=True, host="localhost", port=5000)
 
 
