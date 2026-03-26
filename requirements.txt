@@ -7,4 +7,5 @@ setuptools
 psycopg2
 imbalanced-learn
 redis
+flask
 -e .

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Titanic Survival Prediction | ML Project</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">🚢 Titanic Survival</div>
+            <nav>
+                <a onclick="scrollToSection('overview')">Overview</a>
+                <a onclick="scrollToSection('predict')">Predict</a>
+                <a onclick="scrollToSection('features')">Features</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="hero">
+        <div class="container">
+            <h1>Titanic Survival Prediction</h1>
+            <p>Advanced Machine Learning Analysis & Predictive Modeling</p>
+            <button class="cta-button" onclick="scrollToSection('predict')">Make a Prediction</button>
+        </div>
+    </div>
+
+    <section id="overview" class="container">
+        <h2 class="section-title">Project Overview</h2>
+        <p style="text-align: center; font-size: 18px; color: var(--text-light); margin-bottom: 40px;">
+            This project leverages <span class="highlight">machine learning</span> to predict passenger survival rates
+            on the RMS Titanic. Using historical data and advanced data science techniques, we've built a comprehensive
+            analysis pipeline.
+        </p>
+        <div class="dataset-info">
+            <h2>Dataset Insights</h2>
+            <p>Comprehensive analysis of 892+ passenger records with 13 engineered features</p>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <h3>892</h3>
+                    <p>Passengers Analyzed</p>
+                </div>
+                <div class="stat-box">
+                    <h3>13</h3>
+                    <p>Features Engineered</p>
+                </div>
+                <div class="stat-box">
+                    <h3>38%</h3>
+                    <p>Survival Rate</p>
+                </div>
+                <div class="stat-box">
+                    <h3>3</h3>
+                    <p>Passenger Classes</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="predict" class="container">
+        <h2 class="section-title">Test Survival Prediction</h2>
+        <div class="prediction-form">
+            <h3 class="form-title">👤 Passenger Information</h3>
+            <p class="form-subtitle">Fill in passenger details to predict survival probability</p>
+
+            <div class="error-message" id="errorMessage"></div>
+
+            <form id="predictionForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="pclass">Passenger Class *</label>
+                        <select id="pclass" name="pclass" required>
+                            <option value="">Select a class</option>
+                            <option value="1">1st Class</option>
+                            <option value="2">2nd Class</option>
+                            <option value="3">3rd Class</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sex">Gender *</label>
+                        <select id="sex" name="sex" required>
+                            <option value="">Select gender</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="age">Age (years) *</label>
+                        <input type="number" id="age" name="age" min="0" max="120" step="0.1" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sibsp">Siblings/Spouses Aboard *</label>
+                        <input type="number" id="sibsp" name="sibsp" min="0" max="10" step="1" required value="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="parch">Parents/Children Aboard *</label>
+                        <input type="number" id="parch" name="parch" min="0" max="10" step="1" required value="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fare">Ticket Fare (£) *</label>
+                        <input type="number" id="fare" name="fare" min="0" max="600" step="0.01" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="embarked">Port of Embarkation *</label>
+                        <select id="embarked" name="embarked" required>
+                            <option value="">Select port</option>
+                            <option value="S">Southampton (S)</option>
+                            <option value="C">Cherbourg (C)</option>
+                            <option value="Q">Queenstown (Q)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="name">Passenger Name (optional)</label>
+                        <input type="text" id="name" name="name" placeholder="e.g., Smith, Mr. John">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cabin">Cabin (optional)</label>
+                        <input type="text" id="cabin" name="cabin" placeholder="e.g., C85">
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="submit-btn" id="submitBtn">🚀 Predict Survival</button>
+                    <button type="reset" class="reset-btn">🔄 Clear Form</button>
+                </div>
+            </form>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Analyzing passenger data...</p>
+            </div>
+
+            <div class="prediction-result" id="predictionResult">
+                <div class="result-title" id="resultTitle"></div>
+                <div class="result-probability" id="resultProbability"></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="features" class="container">
+        <h2 class="section-title">Dataset Features</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="icon">⚖️</div>
+                <h3>Passenger Class</h3>
+                <p>Travel class (1st, 2nd, or 3rd) indicating ticket type and amenities</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">♀️♂️</div>
+                <h3>Passenger Gender</h3>
+                <p>Male or Female - critical demographic variable</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">🎂</div>
+                <h3>Age</h3>
+                <p>Passenger age in years (some estimates where not recorded)</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">👫</div>
+                <h3>Siblings & Spouses</h3>
+                <p>Count of relatives in immediate family aboard the ship</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">👨‍👩‍👧</div>
+                <h3>Parents & Children</h3>
+                <p>Number of parents or children traveling with the passenger</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">💰</div>
+                <h3>Fare Amount</h3>
+                <p>Cost of ticket in pounds sterling - varies by class and amenities</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">⛴️</div>
+                <h3>Port of Embarkation</h3>
+                <p>Boarding location (Southampton, Cherbourg, or Queenstown)</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">👨‍👩‍👧‍👦</div>
+                <h3>Family Size</h3>
+                <p>Total family members aboard (SibSp + Parch + 1)</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">🏠</div>
+                <h3>Is Alone</h3>
+                <p>Binary flag indicating if passenger traveled alone</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">🛏️</div>
+                <h3>Has Cabin</h3>
+                <p>Whether cabin number was recorded for the passenger</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">📝</div>
+                <h3>Title</h3>
+                <p>Passenger title extracted from name (Mr, Mrs, Miss, Master)</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">📊</div>
+                <h3>Class × Fare</h3>
+                <p>Interaction feature: Pclass multiplied by Fare</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">📈</div>
+                <h3>Age × Fare</h3>
+                <p>Interaction feature: Age multiplied by Fare</p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <h3>Titanic Survival Prediction Project</h3>
+            <p>Advanced ML Pipeline & Data Science Analysis</p>
+            <p style="margin-top: 20px; opacity: 0.8;">© 2026 | Built with Python, Flask, ML, and ❤️</p>
+        </div>
+    </footer>
+
+    <script>
+        function scrollToSection(sectionId) {
+            const element = document.getElementById(sectionId);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        document.getElementById('predictionForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('predictionResult');
+            const errorMsg = document.getElementById('errorMessage');
+            const submitBtn = document.getElementById('submitBtn');
+
+            errorMsg.classList.remove('show');
+            result.classList.remove('show');
+            errorMsg.textContent = '';
+
+            loading.classList.add('show');
+            submitBtn.disabled = true;
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    const survived = data.prediction === 1;
+                    const probability = (data.probability * 100).toFixed(2);
+
+                    result.classList.remove('result-not-survived', 'result-survived');
+                    result.classList.add(survived ? 'result-survived' : 'result-not-survived');
+
+                    document.getElementById('resultTitle').textContent =
+                        survived ? '✅ Likely to Survive' : '❌ Less Likely to Survive';
+
+                    document.getElementById('resultProbability').textContent =
+                        `Prediction Confidence: ${probability}%`;
+
+                    result.classList.add('show');
+
+                    setTimeout(() => {
+                        result.scrollIntoView({ behavior: 'smooth' });
+                    }, 300);
+                } else {
+                    throw new Error(data.error || 'Prediction failed');
+                }
+            } catch (error) {
+                errorMsg.textContent = '⚠️ ' + error.message;
+                errorMsg.classList.add('show');
+            } finally {
+                loading.classList.remove('show');
+                submitBtn.disabled = false;
+            }
+        });
+
+        document.getElementById('predictionForm').addEventListener('reset', function () {
+            document.getElementById('predictionResult').classList.remove('show');
+            document.getElementById('errorMessage').classList.remove('show');
+        });
+    </script>
+</body>
+
+</html>
