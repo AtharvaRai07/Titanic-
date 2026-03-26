@@ -8,4 +8,5 @@ psycopg2
 imbalanced-learn
 redis
 flask
--e .
+alibi-detect
+# -e .

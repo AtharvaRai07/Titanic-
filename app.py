@@ -8,6 +8,9 @@ from pipeline.training_pipeline import TrainingPipeline
 from src.logger import logging
 from src.exception import CustomException
 from flask import Flask, render_template, request, jsonify
+from sklearn.preprocessing import StandardScaler
+from alibi_detect.cd import KSDrift
+from src.feature_store import RedisFeatureStore
 
 app = Flask(__name__, template_folder='templates', static_folder='templates', static_url_path='')
 
@@ -24,9 +27,32 @@ try:
 except Exception as e:
     logging.error(f"Error loading model: {str(e)}")
 
-# Feature names in correct order
 FEATURES_NAME = ['Age', 'Fare', 'Pclass', 'Sex', 'Parch', 'SibSp', 'Embarked', 'FamilySize', 'IsAlone', 'HasCabin', 'Title', 'PclassFare', 'AgeFare']
 
+feature_store = RedisFeatureStore()
+scaler = StandardScaler()
+
+def fit_scaler_on_reference_data():
+    try:
+        entity_ids = feature_store.get_all_entity_ids()
+        all_features = feature_store.retrieve_batch_feature(entity_ids)
+
+        all_features_df = pd.DataFrame.from_dict(all_features, orient='index')[FEATURES_NAME]
+
+        scaler.fit(all_features_df)
+        return scaler.transform(all_features_df)
+
+    except Exception as e:
+        logging.error(f"Error fitting scaler: {str(e)}")
+        return None
+
+historical_data = fit_scaler_on_reference_data()
+
+ksd = None
+if historical_data is not None:
+    ksd = KSDrift(x_ref=historical_data, p_val=0.05)
+else:
+    logging.warning("Historical data is None. KSDrift detector not initialized.")
 
 @app.route('/')
 def home():
@@ -72,28 +98,20 @@ def predict():
                 title_map = {'Mr': 0, 'Miss': 1, 'Mrs': 2, 'Master': 3}
                 title = title_map.get(title_word, 4)  # 4 for Rare/other
             else:
-                title = 4  # Default to Rare if no title found
+                title = 4
         else:
-            title = 4  # Default to Rare if no name provided
+            title = 4
 
-        # 4. Feature Engineering
-        # FamilySize = SibSp + Parch + 1
         family_size = sibsp + parch + 1
 
-        # IsAlone = 1 if FamilySize == 1 else 0
         is_alone = 1 if family_size == 1 else 0
 
-        # HasCabin = 0 if Cabin is null else 1
         has_cabin = 0 if not cabin_input or cabin_input == '' else 1
 
-        # PclassFare = Pclass * Fare
         pclass_fare = float(pclass) * fare
 
-        # AgeFare = Age * Fare
         age_fare = age * fare
 
-        # ========== CREATE FEATURE ARRAY IN CORRECT ORDER ==========
-        # Order: ['Age', 'Fare', 'Pclass', 'Sex', 'Parch', 'SibSp', 'Embarked', 'FamilySize', 'IsAlone', 'HasCabin', 'Title', 'PclassFare', 'AgeFare']
         features = np.array([[
             age,              # Age
             fare,             # Fare
@@ -110,7 +128,21 @@ def predict():
             float(age_fare)          # AgeFare
         ]])
 
-        # Make prediction
+        features_scaled = scaler.transform(features)
+
+        if ksd is not None:
+            drift = ksd.predict(features_scaled)
+            drift_result = drift.get('data', {}).get('is_drift', False)
+
+            if drift_result is not None and drift_result == 1:
+                print("Data drift detected for input features.")
+                logging.warning("Data drift detected for input features.")
+            else:
+                print("No data drift detected for input features.")
+                logging.info("No data drift detected for input features.")
+        else:
+            logging.warning("KSDrift detector not available. Skipping drift detection.")
+
         prediction = int(model.predict(features)[0])
         probability = float(model.predict_proba(features)[0][1])
 
