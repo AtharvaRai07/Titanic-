@@ -7,4 +7,4 @@ setuptools
 psycopg2
 imbalanced-learn
 redis
-# -e .
+-e .

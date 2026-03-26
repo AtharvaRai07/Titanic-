@@ -1,12 +1,17 @@
-import os
+from pathlib import Path
+
+ROOT_DIR = Path(__file__).resolve().parent.parent
+ARTIFACTS_DIR = ROOT_DIR / "artifacts"
+RAW_DIR = ARTIFACTS_DIR / "raw"
+MODEL_DIR = ARTIFACTS_DIR / "model"
 
 
 ################################ DATA PROCESSING PATHS ################################
 
-RAW_DIR = "artifacts/raw"
-TRAIN_PATH = os.path.join(RAW_DIR,'titanic_train.csv')
-TEST_PATH = os.path.join(RAW_DIR,'titanic_test.csv')
+ARTIFACTS_DIR = ROOT_DIR / "artifacts"
+TRAIN_PATH = RAW_DIR / "titanic_train.csv"
+TEST_PATH = RAW_DIR / "titanic_test.csv"
 
 ################################ MODEL TRAINING PATHS ################################
 
-MODEL_DIR = "artifacts\model"
+MODEL_DIR = ARTIFACTS_DIR / "model"

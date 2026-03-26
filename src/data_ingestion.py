@@ -9,9 +9,9 @@ from config.database_config import DB_CONFIG
 from config.paths_config import *
 
 class DataIngestion:
-    def __init__(self, db_params, ouput_dir):
+    def __init__(self, db_params, output_dir):
         self.db_params = db_params
-        self.output_dir = ouput_dir
+        self.output_dir = output_dir
 
         os.makedirs(self.output_dir, exist_ok=True)
 
@@ -69,5 +69,5 @@ class DataIngestion:
 
 if __name__ == "__main__":
 
-    data_ingestion = DataIngestion(db_params=DB_CONFIG, ouput_dir=RAW_DIR)
+    data_ingestion = DataIngestion(db_params=DB_CONFIG, output_dir=RAW_DIR)
     data_ingestion.run()
