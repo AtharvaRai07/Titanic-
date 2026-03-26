@@ -1,4 +1,0 @@
-[ 2026-03-24 00:03:20,425] 65 root - INFO - Starting data ingestion process.
-[ 2026-03-24 00:03:20,470] 32 root - ERROR - Error connecting to the database.
-[ 2026-03-24 00:03:20,470] 46 root - ERROR - Error extracting data from the database.
-[ 2026-03-24 00:03:20,470] 71 root - ERROR - Data ingestion process failed.
