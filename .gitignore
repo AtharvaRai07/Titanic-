@@ -10,6 +10,7 @@ webserver_config.py
 airflow.cfg
 airflow.db
 include/encoded-joy-418604-a72fc5f59f78.json
+logs/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
